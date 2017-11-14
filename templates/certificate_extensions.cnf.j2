@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+
+[certificate_extensions]
+# Extensions for server certificates (`man x509v3_config`).
+basicConstraints = critical, {{ certificate_basic_constraints | join(', ') }}
+keyUsage = critical, {{ certificate_key_usage | join(', ') }}
+{% if certificate_extended_key_usage is defined  and  certificate_extended_key_usage %}
+extendedKeyUsage=critical, {{ certificate_extended_key_usage | join(', ') }}
+{% endif %}
+subjectKeyIdentifier = hash
+{% if certificate_alt_names is defined %}
+subjectAltName = {{ certificate_alt_names | join(', ')}}
+{% endif %}
+{% if certificate_name_constraints is defined %}
+nameConstraints = critical, {{ certificate_name_constraints | join(',') }}
+{% endif %}

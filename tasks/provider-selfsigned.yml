@@ -1,0 +1,17 @@
+---
+
+- include: key.yml
+- include: csr.yml
+
+- name: self sign certificate
+  command: openssl x509 -req
+    -in "{{ certificate_signing_request_file }}"
+    -signkey "{{ certificate_private_key_file }}"
+    -extfile "{{ certificate_signing_request_config_file }}"
+    -extensions certificate_extensions
+    -out "{{ certificate_file }}"
+    {{ certificate_private_key_password is defined | ternary('-passin env:PRIVATE_KEY_PASSWORD','') }}
+  args:
+    creates: "{{ certificate_file }}"
+  environment:
+    PRIVATE_KEY_PASSWORD: "{{ certificate_private_key_password | default('') }}"

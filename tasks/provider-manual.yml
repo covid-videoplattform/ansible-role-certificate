@@ -1,0 +1,4 @@
+---
+
+- include: key.yml
+- include: csr.yml
