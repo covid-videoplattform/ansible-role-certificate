@@ -1,8 +1,6 @@
 certificate_name: "{{ certificate_common_name | regex_replace(' ', '_') }}"
 certificate_file: "{{ certificate_directory }}/{{ certificate_name }}.cert.pem"
 
-certificate_private_directory: "{{ certificate_directory }}/private"
-
 certificate_private_key_file: "{{ certificate_private_directory }}/{{ certificate_name }}.key.pem"
 certificate_private_key_size: 4096
 
