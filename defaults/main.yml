@@ -1,15 +1,16 @@
 certificate_name: "{{ certificate_common_name | regex_replace(' ', '_') }}"
-certificate_file: "{{ certificate_directory }}/{{ certificate_name }}.cert.pem"
+certificate_file: "{{ certificate_directory }}/certs/{{ certificate_name }}.cert.pem"
 
-certificate_private_key_file: "{{ certificate_private_directory }}/{{ certificate_name }}.key.pem"
+certificate_private_key_file: "{{ certificate_directory }}/private/{{ certificate_name }}.key.pem"
 certificate_private_key_size: 4096
 
-certificate_signing_request_file: "{{ certificate_directory }}/{{ certificate_name }}.csr.pem"
-certificate_signing_request_config_file: "{{ certificate_directory }}/{{ certificate_name }}.csr.cnf"
+certificate_signing_request_file: "{{ certificate_directory }}/csr/{{ certificate_name }}.csr.pem"
+certificate_signing_request_config_file: "{{ certificate_directory }}/cnf/{{ certificate_name }}.csr.cnf"
 
 certificate_authority: false
-certificate_key_usage:
-  - digitalSignature
-  - keyEncipherment
-#certificate_extended_key_usage:
+
+# certificate_key_usage:
+#   - digitalSignature
+#   - keyEncipherment
+# certificate_extended_key_usage:
 #  - serverAuth

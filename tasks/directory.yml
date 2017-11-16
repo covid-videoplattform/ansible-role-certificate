@@ -1,0 +1,22 @@
+---
+
+- name: directory
+  file:
+    path: "{{ certificate_directory }}"
+    state: directory
+
+- name: subdirectories
+  file:
+    path: "{{ certificate_directory }}/{{item}}"
+    state: directory
+  with_items:
+    - certs
+    - csr
+    - cnf
+    - private
+
+- name: private directory
+  file:
+    path: "{{ certificate_authority_directory }}/private"
+    mode: 0700
+    state: directory

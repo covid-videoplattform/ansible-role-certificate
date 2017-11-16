@@ -18,7 +18,7 @@ L = {{certificate_locality}}
 {% if certificate_organization is defined%}
 O = {{certificate_organization}}
 {% endif %}
-{% if certificate_organizational_unit is defined%}/OU=
+{% if certificate_organizational_unit is defined%}
 OU = {{certificate_organizational_unit}}
 {% endif %}
 CN = {{certificate_common_name}}

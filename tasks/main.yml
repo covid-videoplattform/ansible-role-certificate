@@ -1,5 +1,8 @@
 ---
 
+- include: directory.yml
+  when: certificate_directory is defined
+
 - name: setup
   include: setup_{{ansible_os_family}}.yml
 

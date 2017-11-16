@@ -9,3 +9,4 @@
     creates: "{{ certificate_private_key_file }}"
   environment:
     PRIVATE_KEY_PASSWORD: "{{ certificate_private_key_password | default('') }}"
+  notify: certificate changed
