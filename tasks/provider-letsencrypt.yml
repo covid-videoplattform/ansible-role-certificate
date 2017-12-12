@@ -1,1 +1,77 @@
 ---
+
+- name: private key
+  command: openssl genrsa
+    -out "{{certificate_letsencrypt_account_key_file}}"
+    4096
+  args:
+    creates: "{{ certificate_letsencrypt_account_key_file }}"
+
+- include_tasks: key.yml
+- include_tasks: csr.yml
+
+- name: letsencrypt request
+  letsencrypt:
+    account_key: "{{certificate_letsencrypt_account_key_file}}"
+    csr: "{{certificate_signing_request_file}}"
+    dest: "{{certificate_file}}"
+    challenge: http-01
+    acme_directory: https://acme-v01.api.letsencrypt.org/directory
+    agreement: https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf
+  register: _letsencrypt_request
+
+# - debug:
+#     msg:
+#       _letsencrypt_request: "{{_letsencrypt_request}}"
+
+- block:
+    - name: acme http directory
+      file:
+        path: /var/www/default/.well-known/acme-challenge
+        state: directory
+
+    - name: copy acme challenge resource
+      copy:
+        dest: /var/www/default/{{ item.resource }}
+        content: "{{ item.resource_value }}"
+      with_items: "{{ _letsencrypt_request | json_query('challenge_data.*.\"http-01\"') }}"
+
+    - letsencrypt:
+        account_key: "{{certificate_letsencrypt_account_key_file}}"
+        csr: "{{certificate_signing_request_file}}"
+        dest: "{{certificate_file}}"
+        challenge: http-01
+        acme_directory: https://acme-v01.api.letsencrypt.org/directory
+        agreement: https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf
+        data: "{{ _letsencrypt_request }}"
+      register: _letsencrypt
+
+    # - debug:
+    #     msg:
+    #       _letsencrypt: "{{_letsencrypt}}"
+  when: _letsencrypt_request.changed
+
+- name: download letsencrypt certificate
+  get_url:
+    url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem.txt
+    dest: "{{certificate_chain_file}}"
+    checksum: sha512:0fa893f751f0880c7d89c398cae9708f5ff04d466832fb6160a824395032259ac52e02a44da531d0f8bf7e310298b0067b1e8257f816d3223034f391ecba491d
+
+- name: fetch certificate
+  fetch:
+    src: "{{ certificate_file }}"
+    dest: host_files/{{inventory_hostname}}/certificate/{{certificate_name}}.cert.pem
+    flat: yes
+    fail_on_missing: yes
+
+- name: fetch certificate chain
+  fetch:
+    src: "{{ certificate_chain_file }}"
+    dest: host_files/{{inventory_hostname}}/certificate/{{certificate_name}}.chain.pem
+    flat: yes
+    fail_on_missing: yes
+
+- name: create full certificate chain
+  template:
+    src: fullchain.pam.j2
+    dest: "{{ certificate_fullchain_file }}"

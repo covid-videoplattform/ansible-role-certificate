@@ -1,5 +1,8 @@
 ---
 
-- name: install openssl
+- name: install packages
   apt:
-    pkg: openssl
+    pkg: "{{item}}"
+  with_items:
+    - openssl
+    - certbot
