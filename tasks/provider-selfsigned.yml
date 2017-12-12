@@ -1,7 +1,7 @@
 ---
 
-- include: key.yml
-- include: csr.yml
+- include_tasks: key.yml
+- include_tasks: csr.yml
 
 - name: self sign certificate
   command: openssl x509 -req
