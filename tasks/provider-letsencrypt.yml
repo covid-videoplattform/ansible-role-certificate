@@ -1,6 +1,6 @@
 ---
 
-- name: private key
+- name: letsencrypt account private key
   command: openssl genrsa
     -out "{{certificate_letsencrypt_account_key_file}}"
     4096
@@ -61,6 +61,7 @@
     # - debug:
     #     msg:
     #       _letsencrypt: "{{_letsencrypt}}"
+
   when: _letsencrypt_request.changed
 
 - name: download letsencrypt certificate
