@@ -16,12 +16,6 @@
   changed_when: _certificate_checkend.rc == 1
   failed_when: _certificate_checkend.rc > 1
 
-- name: delete certificate when certificate is about to expire
-  file:
-    path: "{{ certificate_file }}"
-    state: absent
-  when: _certificate_checkend.rc == 1
-
 - name: letsencrypt request
   letsencrypt:
     account_key: "{{certificate_letsencrypt_account_key_file}}"
@@ -31,6 +25,7 @@
     acme_directory: https://acme-v01.api.letsencrypt.org/directory
     agreement: https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf
   register: _letsencrypt_request
+  when: _certificate_checkend.rc == 1
 
 # - debug:
 #     msg:
@@ -41,13 +36,11 @@
       file:
         path: /var/www/default/.well-known/acme-challenge
         state: directory
-
     - name: copy acme challenge resource
       copy:
         dest: /var/www/default/{{ item.resource }}
         content: "{{ item.resource_value }}"
       with_items: "{{ _letsencrypt_request | json_query('challenge_data.*.\"http-01\"') }}"
-
     - letsencrypt:
         account_key: "{{certificate_letsencrypt_account_key_file}}"
         csr: "{{certificate_signing_request_file}}"
@@ -57,12 +50,9 @@
         agreement: https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf
         data: "{{ _letsencrypt_request }}"
       register: _letsencrypt
-
-    # - debug:
-    #     msg:
-    #       _letsencrypt: "{{_letsencrypt}}"
-
-  when: _letsencrypt_request.changed
+  when:
+    - _letsencrypt_request.changed
+    - _certificate_checkend.rc == 1
 
 - name: download letsencrypt certificate
   get_url:
