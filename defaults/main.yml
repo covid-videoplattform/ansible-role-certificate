@@ -1,5 +1,7 @@
 certificate_directory: /etc/ssl
 
+certificate_common_name: "{{ inventory_hostname }}"
+
 certificate_name: "{{ certificate_common_name | regex_replace(' ', '_') }}"
 certificate_file: "{{ certificate_directory }}/certs/{{ certificate_name }}.cert.pem"
 certificate_chain_file: "{{ certificate_directory }}/certs/{{ certificate_name }}.chain.pem"
