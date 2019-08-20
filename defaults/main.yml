@@ -21,8 +21,8 @@ certificate_signing_request_config_file: "{{ certificate_directory }}/cnf/{{ cer
 
 certificate_authority: false
 
-# certificate_key_usage:
-#   - digitalSignature
-#   - keyEncipherment
-# certificate_extended_key_usage:
-#  - serverAuth
+certificate_key_usage:
+  - digitalSignature
+  - keyEncipherment
+certificate_extended_key_usage:
+ - serverAuth
