@@ -1,7 +1,8 @@
 ---
 
-- name: install packages
+- name: install debian packages
   apt:
     pkg:
       - openssl
       - certbot
+      - python-cryptography
