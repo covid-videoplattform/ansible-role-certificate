@@ -3,36 +3,26 @@
 - include_tasks: key.yml
 - include_tasks: csr.yml
 
-- name: check if the certificate will expire soon
-  command: openssl x509 -checkend {{ 60*60*24*30 }} -noout -in {{certificate_file}}
-  register: _certificate_checkend
-  changed_when: _certificate_checkend.rc == 1
-  failed_when: _certificate_checkend.rc > 1
+- name: letsencrypt account private key
+  openssl_privatekey:
+    path: "{{certificate_letsencrypt_account_key_file}}"
+    type: RSA
+    size: 4096
+
+- name: letsencrypt request
+  acme_certificate:
+    account_key_src: "{{certificate_letsencrypt_account_key_file}}"
+    csr: "{{certificate_signing_request_file}}"
+    dest: "{{certificate_file}}"
+    chain_dest: "{{ certificate_chain_file }}"
+    fullchain_dest: "{{ certificate_fullchain_file }}"
+    challenge: http-01
+    acme_directory: https://acme-v02.api.letsencrypt.org/directory
+    acme_version: 2
+    terms_agreed: yes
+  register: _letsencrypt_request
 
 - block:
-    - name: letsencrypt account private key
-      openssl_privatekey:
-        path: "{{certificate_letsencrypt_account_key_file}}"
-        type: RSA
-        size: 4096
-
-    - name: letsencrypt request
-      acme_certificate:
-        account_key_src: "{{certificate_letsencrypt_account_key_file}}"
-        csr: "{{certificate_signing_request_file}}"
-        dest: "{{certificate_file}}"
-        chain_dest: "{{ certificate_chain_file }}"
-        fullchain_dest: "{{ certificate_fullchain_file }}"
-        challenge: http-01
-        acme_directory: https://acme-v02.api.letsencrypt.org/directory
-        acme_version: 2
-        terms_agreed: yes
-      register: _letsencrypt_request
-      when: _certificate_checkend.rc == 1
-
-    - debug:
-        msg:
-          _letsencrypt_request: "{{_letsencrypt_request}}"
 
     - name: acme http directory
       file:
@@ -56,5 +46,5 @@
         terms_agreed: yes
         data: "{{ _letsencrypt_request }}"
       register: _letsencrypt
-  when:
-    - _certificate_checkend.rc == 1
+      
+  when: _letsencrypt_request.changed
