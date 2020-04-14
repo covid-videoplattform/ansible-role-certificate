@@ -18,5 +18,5 @@
 - name: private directory
   file:
     path: "{{ certificate_directory }}/private"
-    mode: 0700
+    mode: 0750
     state: directory
